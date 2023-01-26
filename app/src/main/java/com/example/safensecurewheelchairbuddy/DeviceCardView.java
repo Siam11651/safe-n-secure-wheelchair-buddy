@@ -1,6 +1,11 @@
-package com.a2g5.safensecurewheelchairbuddy;
+package com.example.safensecurewheelchairbuddy;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,12 +14,18 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
+
+import java.io.IOException;
 
 /**
  * TODO: document your custom view class.
  */
-public class BluetoothCard extends View
+public class DeviceCardView extends View
 {
+    private Device device;
     private String mExampleString; // TODO: use a default from R.string...
     private int mExampleColor = Color.RED; // TODO: use a default from R.color...
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
@@ -23,20 +34,24 @@ public class BluetoothCard extends View
     private TextPaint mTextPaint;
     private float mTextWidth;
     private float mTextHeight;
+    private Context context;
 
-    public BluetoothCard(Context context)
+    public DeviceCardView(Context context)
     {
         super(context);
+
+        this.context = context;
+
         init(null, 0);
     }
 
-    public BluetoothCard(Context context, AttributeSet attrs)
+    public DeviceCardView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public BluetoothCard(Context context, AttributeSet attrs, int defStyle)
+    public DeviceCardView(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
@@ -45,17 +60,24 @@ public class BluetoothCard extends View
     private void init(AttributeSet attrs, int defStyle)
     {
         // Load attributes
-        final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.BluetoothCard, defStyle, 0);
+        final TypedArray a = getContext().obtainStyledAttributes(
+                attrs, R.styleable.DeviceCardView, defStyle, 0);
 
-        mExampleString = a.getString(R.styleable.BluetoothCard_exampleString);
-        mExampleColor = a.getColor(R.styleable.BluetoothCard_exampleColor, mExampleColor);
+        mExampleString = a.getString(
+                R.styleable.DeviceCardView_exampleString);
+        mExampleColor = a.getColor(
+                R.styleable.DeviceCardView_exampleColor,
+                mExampleColor);
         // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
         // values that should fall on pixel boundaries.
-        mExampleDimension = a.getDimension(R.styleable.BluetoothCard_exampleDimension, mExampleDimension);
+        mExampleDimension = a.getDimension(
+                R.styleable.DeviceCardView_exampleDimension,
+                mExampleDimension);
 
-        if(a.hasValue(R.styleable.BluetoothCard_exampleDrawable))
+        if(a.hasValue(R.styleable.DeviceCardView_exampleDrawable))
         {
-            mExampleDrawable = a.getDrawable(R.styleable.BluetoothCard_exampleDrawable);
+            mExampleDrawable = a.getDrawable(
+                    R.styleable.DeviceCardView_exampleDrawable);
             mExampleDrawable.setCallback(this);
         }
 
@@ -68,6 +90,41 @@ public class BluetoothCard extends View
 
         // Update TextPaint and text measurements from attributes
         invalidateTextPaintAndMeasurements();
+
+        setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(device.GetID());
+                if(ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
+                {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+
+                try
+                {
+                    BluetoothSocket bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(BluetoothManager.GetBluetoothManager().GetUUID());
+
+                    BluetoothManager.GetBluetoothManager().SetBluetoothDevice(bluetoothDevice);
+                    BluetoothManager.GetBluetoothManager().GetBluetoothSocket(bluetoothSocket);
+
+                    // change activity
+                }
+                catch(IOException e)
+                {
+                    // implement handler later ig
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     private void invalidateTextPaintAndMeasurements()
@@ -96,12 +153,16 @@ public class BluetoothCard extends View
         int contentHeight = getHeight() - paddingTop - paddingBottom;
 
         // Draw the text.
-        canvas.drawText(mExampleString, paddingLeft + (contentWidth - mTextWidth) / 2, paddingTop + (contentHeight + mTextHeight) / 2, mTextPaint);
+        canvas.drawText(mExampleString,
+                paddingLeft + (contentWidth - mTextWidth) / 2,
+                paddingTop + (contentHeight + mTextHeight) / 2,
+                mTextPaint);
 
         // Draw the example drawable on top of the text.
         if(mExampleDrawable != null)
         {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop, paddingLeft + contentWidth, paddingTop + contentHeight);
+            mExampleDrawable.setBounds(paddingLeft, paddingTop,
+                    paddingLeft + contentWidth, paddingTop + contentHeight);
             mExampleDrawable.draw(canvas);
         }
     }
@@ -191,5 +252,13 @@ public class BluetoothCard extends View
     public void setExampleDrawable(Drawable exampleDrawable)
     {
         mExampleDrawable = exampleDrawable;
+    }
+
+    public void SetDevice(Device device)
+    {
+        this.device = device;
+
+        ((TextView)findViewById(R.id.device_name_text_view)).setText(device.GetName());
+        ((TextView)findViewById(R.id.device_id_text_view)).setText(device.GetID());
     }
 }

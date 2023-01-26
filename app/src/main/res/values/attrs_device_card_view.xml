@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="BluetoothCard">
+    <declare-styleable name="DeviceCardView">
         <attr name="exampleString" format="string" />
         <attr name="exampleDimension" format="dimension" />
         <attr name="exampleColor" format="color" />
