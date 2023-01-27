@@ -1,11 +1,6 @@
 package com.example.safensecurewheelchairbuddy;
 
-import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,34 +11,26 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.core.app.ActivityCompat;
-
-import java.io.IOException;
-
 /**
  * TODO: document your custom view class.
  */
-public class DeviceCardView extends View
+public class ScannedDeviceView extends View
 {
     private Device device;
-    private Context context;
 
-    public DeviceCardView(Context context)
+    public ScannedDeviceView(Context context)
     {
         super(context);
-
-        this.context = context;
-
         init(null, 0);
     }
 
-    public DeviceCardView(Context context, AttributeSet attrs)
+    public ScannedDeviceView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public DeviceCardView(Context context, AttributeSet attrs, int defStyle)
+    public ScannedDeviceView(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
@@ -53,7 +40,7 @@ public class DeviceCardView extends View
     {
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.DeviceCardView, defStyle, 0);
+                attrs, R.styleable.ScannedDeviceView, defStyle, 0);
 
         a.recycle();
     }

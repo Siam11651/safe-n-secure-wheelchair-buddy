@@ -1,11 +1,9 @@
 package com.example.safensecurewheelchairbuddy;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
+import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,46 +12,46 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.app.ActivityCompat;
+import androidx.cardview.widget.CardView;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * TODO: document your custom view class.
  */
-public class DeviceCardView extends View
+public class ConnectBluetoothList extends View
 {
-    private Device device;
     private Context context;
 
-    public DeviceCardView(Context context)
+    public ConnectBluetoothList(Context context)
     {
         super(context);
-
-        this.context = context;
-
-        init(null, 0);
+        init(context, null, 0);
     }
 
-    public DeviceCardView(Context context, AttributeSet attrs)
+    public ConnectBluetoothList(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        init(attrs, 0);
+        init(context, attrs, 0);
     }
 
-    public DeviceCardView(Context context, AttributeSet attrs, int defStyle)
+    public ConnectBluetoothList(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
-        init(attrs, defStyle);
+        init(context, attrs, defStyle);
     }
 
-    private void init(AttributeSet attrs, int defStyle)
+    private void init(Context context, AttributeSet attrs, int defStyle)
     {
+        this.context = context;
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.DeviceCardView, defStyle, 0);
+                attrs, R.styleable.ConnectBluetoothList, defStyle, 0);
 
         a.recycle();
     }
@@ -72,13 +70,5 @@ public class DeviceCardView extends View
 
         int contentWidth = getWidth() - paddingLeft - paddingRight;
         int contentHeight = getHeight() - paddingTop - paddingBottom;
-    }
-
-    public void SetDevice(Device device)
-    {
-        this.device = device;
-
-        ((TextView)findViewById(R.id.device_name_text_view)).setText(device.GetName());
-        ((TextView)findViewById(R.id.device_id_text_view)).setText(device.GetID());
     }
 }

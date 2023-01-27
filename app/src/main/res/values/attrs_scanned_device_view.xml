@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="DeviceCardView">
+    <declare-styleable name="ScannedDeviceView">
 
     </declare-styleable>
 </resources>
