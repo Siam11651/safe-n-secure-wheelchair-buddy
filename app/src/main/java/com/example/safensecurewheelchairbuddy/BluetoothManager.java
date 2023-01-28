@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 public class BluetoothManager
@@ -12,6 +14,8 @@ public class BluetoothManager
     private BluetoothDevice bluetoothDevice;
     private BluetoothSocket bluetoothSocket;
     private UUID uuid;
+    private OutputStream outputStream;
+    private InputStream inputStream;
 
     private BluetoothManager()
     {
@@ -35,9 +39,14 @@ public class BluetoothManager
         this.bluetoothDevice = bluetoothDevice;
     }
 
-    public void SetBluetoothSocket(BluetoothSocket bluetoothSocket)
+    public void SetBluetoothSocket(BluetoothSocket bluetoothSocket) throws IOException
     {
         this.bluetoothSocket = bluetoothSocket;
+
+        bluetoothSocket.connect();
+
+        outputStream = bluetoothSocket.getOutputStream();
+        inputStream = bluetoothSocket.getInputStream();
     }
 
     public BluetoothDevice GetBluetoothDevice()
@@ -45,9 +54,14 @@ public class BluetoothManager
         return bluetoothDevice;
     }
 
-    public BluetoothSocket GetBluetoothSocket(BluetoothSocket bluetoothSocket)
+    public BluetoothSocket GetBluetoothSocket()
     {
-        return this.bluetoothSocket;
+        return bluetoothSocket;
+    }
+
+    public OutputStream GetOutputStream()
+    {
+        return outputStream;
     }
 
     public void UnsetDevice()
@@ -63,6 +77,8 @@ public class BluetoothManager
         }
 
         bluetoothSocket = null;
+        outputStream = null;
+        inputStream = null;
     }
 
     public UUID GetUUID()

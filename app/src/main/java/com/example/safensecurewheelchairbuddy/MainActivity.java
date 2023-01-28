@@ -38,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -285,6 +286,46 @@ public class MainActivity extends AppCompatActivity
 
             ((TextView)view.findViewById(R.id.device_name_text_view)).setText(devicesList.get(i).GetName());
             ((TextView)view.findViewById(R.id.device_id_text_view)).setText(devicesList.get(i).GetID());
+
+            int finalI = i;
+            view.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    Dialog dialog = new Dialog(MainActivity.this);
+
+                    dialog.setContentView(new ProgressBar(MainActivity.this));
+                    dialog.setCancelable(false);
+                    dialog.show();
+
+                    BluetoothConnector bluetoothConnector = new BluetoothConnector(devicesList.get(finalI), MainActivity.this, MainActivity.this);
+                    Thread thread = new Thread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                bluetoothConnector.Connect();
+                            }
+                            catch(IOException e)
+                            {
+                                Toast toast = new Toast(MainActivity.this);
+
+                                toast.setText("Cannot connect to bluetooth device");
+                                toast.setDuration(Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+
+                            dialog.dismiss();
+                        }
+                    });
+
+                    thread.start();
+                }
+            });
+
             devicesListLinearLayout.addView(view);
         }
     }

@@ -67,7 +67,7 @@ public class DeviceCardAdapter extends RecyclerView.Adapter<DeviceCardViewHolder
                     BluetoothSocket bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(BluetoothManager.GetBluetoothManager().GetUUID());
 
                     BluetoothManager.GetBluetoothManager().SetBluetoothDevice(bluetoothDevice);
-                    BluetoothManager.GetBluetoothManager().GetBluetoothSocket(bluetoothSocket);
+                    BluetoothManager.GetBluetoothManager().SetBluetoothSocket(bluetoothSocket);
 
                     // change activity
                 }
