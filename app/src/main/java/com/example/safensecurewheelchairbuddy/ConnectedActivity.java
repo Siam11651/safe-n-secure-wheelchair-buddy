@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -20,79 +22,6 @@ import javax.sql.PooledConnection;
 
 public class ConnectedActivity extends AppCompatActivity
 {
-    static class PollRunner implements Runnable {
-        private boolean keepRunning;
-        private final ImageButton leftButton;
-        private final ImageButton rightButton;
-        private final ImageButton forwardButton;
-        private final ImageButton backwardButton;
-
-        public PollRunner(ImageButton forwardButton, ImageButton backwardButton, ImageButton leftButton, ImageButton rightButton)
-        {
-            this.forwardButton = forwardButton;
-            this.backwardButton = backwardButton;
-            this.leftButton = leftButton;
-            this.rightButton = rightButton;
-            keepRunning = true;
-        }
-
-        private synchronized void SyncedRun()
-        {
-            BluetoothManager bluetoothManager = BluetoothManager.GetBluetoothManager();
-
-            Log.println(Log.DEBUG, "start", "loop");
-
-            while(keepRunning)
-            {
-                try
-                {
-                    if(leftButton.isPressed())
-                    {
-                        Log.println(Log.DEBUG, "button", "left");
-
-                        bluetoothManager.GetOutputStream().write("l\\".getBytes());
-                    }
-                    else if(rightButton.isPressed())
-                    {
-                        Log.println(Log.DEBUG, "button", "l");
-
-                        bluetoothManager.GetOutputStream().write("r\\".getBytes());
-                    }
-                    else if(forwardButton.isPressed())
-                    {
-                        Log.println(Log.DEBUG, "button", "left");
-
-                        bluetoothManager.GetOutputStream().write("f\\".getBytes());
-                    }
-                    else if(backwardButton.isPressed())
-                    {
-                        Log.println(Log.DEBUG, "button", "left");
-
-                        bluetoothManager.GetOutputStream().write("b\\".getBytes());
-                    }
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException();
-                }
-            }
-        }
-
-        @Override
-        public void run()
-        {
-            SyncedRun();
-        }
-
-        public void Stop()
-        {
-            keepRunning = false;
-        }
-    }
-
-    private Thread inputPollThread;
-    private PollRunner pollRunner;
-
     static class DirectionClickListener implements View.OnTouchListener
     {
         private final String direction;
@@ -144,16 +73,12 @@ public class ConnectedActivity extends AppCompatActivity
         ImageButton forwardButton = findViewById(R.id.forward_button);
         ImageButton backwardButton = findViewById(R.id.backward_button);
         Button setNumberButton = findViewById(R.id.set_number_button);
+        Switch phoneControlSwitch = findViewById(R.id.switch_phone_control);
 
         leftButton.setOnTouchListener(new DirectionClickListener("l"));
         rightButton.setOnTouchListener(new DirectionClickListener("r"));
         forwardButton.setOnTouchListener(new DirectionClickListener("f"));
         backwardButton.setOnTouchListener(new DirectionClickListener("b"));
-
-        // pollRunner = new PollRunner(forwardButton, backwardButton, leftButton, rightButton);
-        // inputPollThread = new Thread(pollRunner);
-
-        // inputPollThread.start();
 
         setNumberButton.setOnClickListener(new View.OnClickListener()
         {
@@ -178,7 +103,7 @@ public class ConnectedActivity extends AppCompatActivity
 
                         try
                         {
-                            bluetoothManager.GetOutputStream().write(number.getText().toString().getBytes());
+                            bluetoothManager.GetOutputStream().write(("s\\" + number.getText().toString() + "%\\").getBytes());
                         }
                         catch(IOException e)
                         {
@@ -191,13 +116,99 @@ public class ConnectedActivity extends AppCompatActivity
                 alertDialogBuilder.show();
             }
         });
+
+        phoneControlSwitch.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                BluetoothManager bluetoothManager = BluetoothManager.GetBluetoothManager();
+
+                try
+                {
+                    if(((Switch)v).isChecked())
+                    {
+                        bluetoothManager.GetOutputStream().write("x\\".getBytes());
+                    }
+                    else
+                    {
+                        bluetoothManager.GetOutputStream().write("y\\".getBytes());
+                    }
+                }
+                catch(IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        BluetoothManager bluetoothManager = BluetoothManager.GetBluetoothManager();
+
+        try
+        {
+            bluetoothManager.GetOutputStream().write("q\\".getBytes());
+        }
+        catch(IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        Thread thread = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                while(true)
+                {
+                    try
+                    {
+                        if(bluetoothManager.GetInputStream().available() > 0)
+                        {
+                            byte[] byteArray = new byte[bluetoothManager.GetInputStream().available()];
+
+                            bluetoothManager.GetInputStream().read(byteArray);
+
+                            String command = new String(byteArray);
+
+                            if(command.equals("0"))
+                            {
+                                runOnUiThread(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        phoneControlSwitch.setChecked(false);
+                                    }
+                                });
+                            }
+                            else if(command.equals("1"))
+                            {
+                                runOnUiThread(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        phoneControlSwitch.setChecked(true);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    catch(IOException e)
+                    {
+                        break;
+                    }
+                }
+            }
+        });
+
+        thread.start();
     }
 
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
-        // pollRunner.Stop();
 
         BluetoothManager bluetoothManager = BluetoothManager.GetBluetoothManager();
 

@@ -64,6 +64,11 @@ public class BluetoothManager
         return outputStream;
     }
 
+    public InputStream GetInputStream()
+    {
+        return inputStream;
+    }
+
     public void UnsetDevice()
     {
         bluetoothDevice = null;
@@ -74,6 +79,16 @@ public class BluetoothManager
         if(bluetoothSocket != null)
         {
             bluetoothSocket.close();
+        }
+
+        if(outputStream != null)
+        {
+            outputStream.close();
+        }
+
+        if(inputStream != null)
+        {
+            inputStream.close();
         }
 
         bluetoothSocket = null;
